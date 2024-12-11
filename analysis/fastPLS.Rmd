@@ -16,6 +16,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(fastsimpls)
@@ -132,9 +133,10 @@ The dataset used are split into multiple folds or subsets, one of the folds is u
 Cross validation technique is useful in machine learning algorithm to avoid overfitting.
 
 ### 6.1 Types of Cross-Validation
+```{r external-image, echo=FALSE, out.width="30%", fig.align="center"}
+knitr::include_graphics("https://github.com/ModupeOjo/Tutorial/blob/master/static/images/Picture1.png")
+```
 
-
->>>>>>> Stashed changes
 ## 6  **How to Cite this Package**
 
 Cacciatore S, Tenori L Bennett P, MacIntyre DA, Dupe Ojo and XXXX. fastPLS: an updated R package for knowledge discovery and data mining.	Bioinformatics. Submitted.
