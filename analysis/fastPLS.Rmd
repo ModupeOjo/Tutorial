@@ -1,0 +1,176 @@
+
+---
+title: "Knowledge Discovery by Accuracy Maximization"
+author: "Stefano Cacciatore, Leonardo Tenori"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    highlight: null
+    number_sections: no
+    fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Knowledge Discovery by Accuracy Maximization}
+  %\VignetteDepends{fastPLS}
+  %\VignetteKeywords{fastPLS}
+  %\VignettePackage{fastPLS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(fastsimpls)
+```
+
+## 1  **Introduction**
+
+fastPLS (Knowledge Discovery by Accuracy Maximization) is a novel learning algorithm for unsupervised feature extraction, specifically designed for analysing noisy and high-dimensional data sets (Cacciatore \emph{et al.}, 2014).The core idea of the original algorithm is to use an iteration procedure to produce a hypothetical classification through maximization of cross-validated predictive accuracy. Using only the data set as input (no \emph{a priori} knowledge is needed), an iterative procedure permits classification with a high cross-validated accuracy.
+Two different classifiers are implemented in this package for the computation of cross-validated predictive accuracy: \emph{k}-nearest neighbors (\emph{k}NN) and Partial Least Squares - Discriminant Analysis (PLS-DA). This procedure is repeated several times to average the effects owing to the randomness of the iterative procedure. After each run of the procedure, a classification vector with high cross-validated accuracy is obtained. fastPLS subsequently collects and processes these results by constructing a dissimilarity matrix to provide a holistic view of the data.
+This documentation introduces the usage of fastPLS. 
+
+
+ 
+## 2	**Installation**
+
+### 2.1 Installation via CRAN
+
+The R package fastPLS (current version 1.1) is part of the Comprehensive R Archive Network (CRAN)^[https://cran.r-project.org/]. The simplest way to install the package is to enter the following command into your R session: `install.packages("fastPLS")`. We suggest to install the R package `rgl` for the data visualization in 3D interactive plots.
+
+### 2.2 Manual installation from source
+
+To compile the C/C++ code included in the package for customization or installation on alternative operating systems the package can be manually installed from source. To this end, open the package's page at CRAN (Cacciatore \emph{et al.}, 2014) and then proceed as follows:
+
+- Download fastPLS.tar.gz and save it to your hard disk
+- Open a shell/terminal/command prompt window and change to the desired directory for installation of fastPLS.tar.gz. Enter `R CMD INSTALL fastPLS.tar.gz` to install the package.
+Note that this may require additional software on some platforms. Windows requires Rtools^[https://developer.apple.com/xcode/] to be installed and to be available in the default search path (environment variable PATH). MAC OS X requires installation of Xcode developers and command line tools.
+
+
+### 2.3 Compatibility issues
+
+All versions downloadable from CRAN have been built using R version, R.3.2.3. The package should work without major issues on R versions > 3.0.0.
+
+## 3  **Getting Started** 
+
+To load the package, enter the following instruction in your R session:
+
+    library("fastPLS")
+
+If this command terminates without any error messages, you can be sure that the package has been installed successfully. The fastPLS package is now ready for use.
+
+The package includes both a user manual (this document) and a reference manual (help pages for each function). To view the user manual, enter `vignette("fastPLS")`. Help pages can be viewed using the help command `help(package="fastPLS")`.
+
+ \newpage
+ 
+## 4 **Example using iris dataset** 
+
+Download the dataset
+```{r, eval=FALSE}
+library(fastsimpls)
+data(iris)
+```
+
+Select a random samples from the large dataset
+```{r ss-chunk, echo=TRUE}
+ss=sample(150,15)
+```
+
+Split the predictors and the response data
+```{r Xtrain-chunk, echo=TRUE}
+Xtrain=iris[-ss,-5]
+Xtest=iris[ss,-5]
+Ytrain=iris[-ss,5]
+Ytest=iris[ss,5]
+labels=iris[,5]
+```
+
+
+Perform pls on the dataset
+
+```{r z-chunk, echo=TRUE}
+z=pls(Xtrain,Ytrain,Xtest)
+
+```
+
+Assign variable to the predicted and actual labels 
+```{r predictions-chunk, echo=TRUE}
+predictions <- z$Ypred
+actual_labels <- labels[ss]
+```
+
+Create a dataframe that shows the predicted and the actual label
+```{r results-chunk, echo=TRUE}
+results <- data.frame(Predicted = predictions, Actual= actual_labels)
+results
+```
+
+
+
+## 5 **Conclusion**
+The table above gives a comparison of the **predicted** and **actual label**. This shows that the pls model was not efficient or accurate to predict some of the labels. This method is limited by the user inability to select the number of component to use, which affects the accuracy of the model 
+
+### 5.1  **Choosing the number of component**
+Selecting the number of components when performing partial least square regression is crucial for achieving a good performance model. 
+
+Below is an example of how to input number of component for a model
+
+```{r pp-chunk, echo=TRUE}
+pp=pls(Xtrain,Ytrain,Xtest,ncomp = c(2,4))
+pp$Ypred
+```
+The above result for 2 components which was indicated as **ncomp = c(2,4)**.
+
+Selecting too few or too many components can lead to underfitting or overfitting, respectively.
+
+A statistical model or a machine learning algorithm is said to have underfitting when a model is too simple to capture data complexities. It represents the inability of the model to learn the training data effectively result in poor performance both on the training and testing data
+
+Overfitting occurs when a model algorithm fails to give prediction on new dataset however gives ideal prediction on training dataset.This occurs when the model has been over-trained on a single or specific dataset.
+
+## 6 Cross Validation
+Cross validation is a method used in machine learning to evaluate the performance of a model on test data. 
+
+The dataset used are split into multiple folds or subsets, one of the folds is used as validation set and the reminder subset are used to train the model.This process is repeated several times, with a different fold used as the validation set each time.Finally, the results from each validation step are averaged to provide a more reliable estimate of the model's performance.
+
+Cross validation technique is useful in machine learning algorithm to avoid overfitting.
+
+### 6.1 Types of Cross-Validation
+
+```{r echo=FALSE, out.width = "30%", fig.align = "center"}
+knitr::include_graphics("static/images/Picture1.png")
+```
+
+## 6  **How to Cite this Package**
+
+Cacciatore S, Tenori L Bennett P, MacIntyre DA, Dupe Ojo and XXXX. fastPLS: an updated R package for knowledge discovery and data mining.	Bioinformatics. Submitted.
+
+Moreover, the original paper in which fastPLS was introduced should also be cited as follows:
+
+Cacciatore S, Luchinat C, Tenori L. Knowledge discovery by accuracy maximization. Proc Natl Acad Sci U S A 2014;111(14):5117-22.	
+
+To obtain BibTex entries of the two references, you can enter the following into your R session to Bibtex `citation("fastPLS")`.
+
+
+
+
+ \newpage
+
+## 7  **References**
+
+
+Cacciatore S, Luchinat C, Tenori L (2014) Knowledge discovery by accuracy maximization. \emph{Proc Natl Acad Sci USA},111, 5117-22.
+
+Alizadeh AA, \emph{et al.} (2000) Distinct types of diffuse large B-cell lymphoma identified by gene expression profiling. \emph{Nature}, 403(6769), 503-11.
+
+Cameron CA, et al. (1997) An R-squared measure of goodness of fit of some common nonlinear regression models. \emph{J Econometrics} 77(2), 1790-2.
+
+Dieterle, F et al. (2006) Probabilistic Quotient Normalization as Robust Method to Account for Diluition of Complex Biological Mixtures. Application in 1H NMR Metabolomics. Anal Chem, 78, 4281-90.
+
+Dudoit S, Fridlyand J, Speed TP (2002) Comparison of discrimination methods for the classification of tumors using gene expression data. \emph{J Am Stat Assoc}, 97(417), 77-87.
+
+Fisher RA (1936) The use of multiple measurements in taxonomic problems. \emph{Annals of Eugenics}, 7, Part II, 179–88.
+
+Sammon, J. W. (1969) A non-linear mapping for data structure analysis. \emph{IEEE Trans Comput}, C-18 401–409.
+
+Shannon CE (1948) A mathematical theory of communication. \emph{Bell Syst Tech J}, 27(3), 379-423.
+
+van der Maaten, L.J.P. & Hinton, G.E. (2008) Visualizing High-Dimensional Data Using t-SNE. \emph{Journal of Machine Learning Research}, 9, 2579-2605.
+
+van der Maaten, L.J.P. (2014) Accelerating t-SNE using Tree-Based Algorithms. \emph{Journal of Machine Learning Research}, 15, 3221-3245.

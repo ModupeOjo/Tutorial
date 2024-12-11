@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Stefano Cacciatore, Leonardo Tenori" />
+
+<meta name="date" content="2024-12-11" />
+
+<title>Knowledge Discovery by Accuracy Maximization</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">tutorial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Knowledge Discovery by Accuracy
+Maximization</h1>
+<h4 class="author">Stefano Cacciatore, Leonardo Tenori</h4>
+<h4 class="date">2024-12-11</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2024-12-11
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 6
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 1
+</p>
+<p>
+<strong>Knit directory:</strong> <code>tutorial/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.1). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguncommittedchanges">
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> uncommitted
+changes </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguncommittedchanges"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The R Markdown is untracked by Git. To know which version of the R
+Markdown file created these results, you’ll want to first commit it to
+the Git repo. If you’re still working on the analysis, you can ignore
+this warning. When you’re finished, you can run
+<code>wflow_publish</code> to commit the R Markdown file and build the
+HTML.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20241210code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(20241210)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20241210code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20241210)</code> was run prior to running
+the code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomModupeOjotutorialtree11af1e8da5bfbfebf204ade907084fcbb19eda52targetblank11af1e8a">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/ModupeOjo/tutorial/tree/11af1e8da5bfbfebf204ade907084fcbb19eda52" target="_blank">11af1e8</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcomModupeOjotutorialtree11af1e8da5bfbfebf204ade907084fcbb19eda52targetblank11af1e8a"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/ModupeOjo/tutorial/tree/11af1e8da5bfbfebf204ade907084fcbb19eda52" target="_blank">11af1e8</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+
+Untracked files:
+    Untracked:  analysis/fastPLS.Rmd
+    Untracked:  static/
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+<p>
+There are no past versions. Publish this analysis with
+<code>wflow_publish()</code> to start tracking its development.
+</p>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level2">
+<h2>1 <strong>Introduction</strong></h2>
+<p>fastPLS (Knowledge Discovery by Accuracy Maximization) is a novel
+learning algorithm for unsupervised feature extraction, specifically
+designed for analysing noisy and high-dimensional data sets (Cacciatore
+, 2014).The core idea of the original algorithm is to use an iteration
+procedure to produce a hypothetical classification through maximization
+of cross-validated predictive accuracy. Using only the data set as input
+(no knowledge is needed), an iterative procedure permits classification
+with a high cross-validated accuracy. Two different classifiers are
+implemented in this package for the computation of cross-validated
+predictive accuracy: -nearest neighbors (NN) and Partial Least Squares -
+Discriminant Analysis (PLS-DA). This procedure is repeated several times
+to average the effects owing to the randomness of the iterative
+procedure. After each run of the procedure, a classification vector with
+high cross-validated accuracy is obtained. fastPLS subsequently collects
+and processes these results by constructing a dissimilarity matrix to
+provide a holistic view of the data. This documentation introduces the
+usage of fastPLS.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>2 <strong>Installation</strong></h2>
+<div id="installation-via-cran" class="section level3">
+<h3>2.1 Installation via CRAN</h3>
+<p>The R package fastPLS (current version 1.1) is part of the
+Comprehensive R Archive Network (CRAN)<a href="#fn1"
+class="footnote-ref" id="fnref1"><sup>1</sup></a>. The simplest way to
+install the package is to enter the following command into your R
+session: <code>install.packages("fastPLS")</code>. We suggest to install
+the R package <code>rgl</code> for the data visualization in 3D
+interactive plots.</p>
+</div>
+<div id="manual-installation-from-source" class="section level3">
+<h3>2.2 Manual installation from source</h3>
+<p>To compile the C/C++ code included in the package for customization
+or installation on alternative operating systems the package can be
+manually installed from source. To this end, open the package’s page at
+CRAN (Cacciatore , 2014) and then proceed as follows:</p>
+<ul>
+<li>Download fastPLS.tar.gz and save it to your hard disk</li>
+<li>Open a shell/terminal/command prompt window and change to the
+desired directory for installation of fastPLS.tar.gz. Enter
+<code>R CMD INSTALL fastPLS.tar.gz</code> to install the package. Note
+that this may require additional software on some platforms. Windows
+requires Rtools<a href="#fn2" class="footnote-ref"
+id="fnref2"><sup>2</sup></a> to be installed and to be available in the
+default search path (environment variable PATH). MAC OS X requires
+installation of Xcode developers and command line tools.</li>
+</ul>
+</div>
+<div id="compatibility-issues" class="section level3">
+<h3>2.3 Compatibility issues</h3>
+<p>All versions downloadable from CRAN have been built using R version,
+R.3.2.3. The package should work without major issues on R versions &gt;
+3.0.0.</p>
+</div>
+</div>
+<div id="getting-started" class="section level2">
+<h2>3 <strong>Getting Started</strong></h2>
+<p>To load the package, enter the following instruction in your R
+session:</p>
+<pre><code>library(&quot;fastPLS&quot;)</code></pre>
+<p>If this command terminates without any error messages, you can be
+sure that the package has been installed successfully. The fastPLS
+package is now ready for use.</p>
+<p>The package includes both a user manual (this document) and a
+reference manual (help pages for each function). To view the user
+manual, enter <code>vignette("fastPLS")</code>. Help pages can be viewed
+using the help command <code>help(package="fastPLS")</code>.</p>
+<p></p>
+</div>
+<div id="example-using-iris-dataset" class="section level2">
+<h2>4 <strong>Example using iris dataset</strong></h2>
+<p>Download the dataset</p>
+<pre class="r"><code>library(fastsimpls)
+data(iris)</code></pre>
+<p>Select a random samples from the large dataset</p>
+<pre class="r"><code>ss=sample(150,15)</code></pre>
+<p>Split the predictors and the response data</p>
+<pre class="r"><code>Xtrain=iris[-ss,-5]
+Xtest=iris[ss,-5]
+Ytrain=iris[-ss,5]
+Ytest=iris[ss,5]
+labels=iris[,5]</code></pre>
+<p>Perform pls on the dataset</p>
+<pre class="r"><code>z=pls(Xtrain,Ytrain,Xtest)</code></pre>
+<p>Assign variable to the predicted and actual labels</p>
+<pre class="r"><code>predictions &lt;- z$Ypred
+actual_labels &lt;- labels[ss]</code></pre>
+<p>Create a dataframe that shows the predicted and the actual label</p>
+<pre class="r"><code>results &lt;- data.frame(Predicted = predictions, Actual= actual_labels)
+results</code></pre>
+<pre><code>           V1     Actual
+1   virginica  virginica
+2      setosa     setosa
+3   virginica  virginica
+4      setosa     setosa
+5   virginica  virginica
+6  versicolor versicolor
+7   virginica  virginica
+8      setosa     setosa
+9      setosa     setosa
+10  virginica versicolor
+11  virginica  virginica
+12 versicolor versicolor
+13  virginica  virginica
+14 versicolor  virginica
+15     setosa     setosa</code></pre>
+</div>
+<div id="conclusion" class="section level2">
+<h2>5 <strong>Conclusion</strong></h2>
+<p>The table above gives a comparison of the <strong>predicted</strong>
+and <strong>actual label</strong>. This shows that the pls model was not
+efficient or accurate to predict some of the labels. This method is
+limited by the user inability to select the number of component to use,
+which affects the accuracy of the model</p>
+<div id="choosing-the-number-of-component" class="section level3">
+<h3>5.1 <strong>Choosing the number of component</strong></h3>
+<p>Selecting the number of components when performing partial least
+square regression is crucial for achieving a good performance model.</p>
+<p>Below is an example of how to input number of component for a
+model</p>
+<pre class="r"><code>pp=pls(Xtrain,Ytrain,Xtest,ncomp = c(2,4))
+pp$Ypred</code></pre>
+<pre><code>           V1         V2
+1   virginica  virginica
+2      setosa     setosa
+3   virginica  virginica
+4      setosa     setosa
+5   virginica  virginica
+6   virginica versicolor
+7  versicolor  virginica
+8      setosa     setosa
+9      setosa     setosa
+10  virginica  virginica
+11 versicolor  virginica
+12 versicolor versicolor
+13  virginica  virginica
+14  virginica versicolor
+15     setosa     setosa</code></pre>
+<p>The above result for 2 components which was indicated as
+<strong>ncomp = c(2,4)</strong>.</p>
+<p>Selecting too few or too many components can lead to underfitting or
+overfitting, respectively.</p>
+<p>A statistical model or a machine learning algorithm is said to have
+underfitting when a model is too simple to capture data complexities. It
+represents the inability of the model to learn the training data
+effectively result in poor performance both on the training and testing
+data</p>
+<p>Overfitting occurs when a model algorithm fails to give prediction on
+new dataset however gives ideal prediction on training dataset.This
+occurs when the model has been over-trained on a single or specific
+dataset.</p>
+</div>
+</div>
+<div id="cross-validation" class="section level2">
+<h2>6 Cross Validation</h2>
+<p>Cross validation is a method used in machine learning to evaluate the
+performance of a model on test data.</p>
+<p>The dataset used are split into multiple folds or subsets, one of the
+folds is used as validation set and the reminder subset are used to
+train the model.This process is repeated several times, with a different
+fold used as the validation set each time.Finally, the results from each
+validation step are averaged to provide a more reliable estimate of the
+model’s performance.</p>
+<p>Cross validation technique is useful in machine learning algorithm to
+avoid overfitting.</p>
+<div id="types-of-cross-validation" class="section level3">
+<h3>6.1 Types of Cross-Validation</h3>
+<p><img src="static/images/Picture1.png" width="30%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="how-to-cite-this-package" class="section level2">
+<h2>6 <strong>How to Cite this Package</strong></h2>
+<p>Cacciatore S, Tenori L Bennett P, MacIntyre DA, Dupe Ojo and XXXX.
+fastPLS: an updated R package for knowledge discovery and data mining.
+Bioinformatics. Submitted.</p>
+<p>Moreover, the original paper in which fastPLS was introduced should
+also be cited as follows:</p>
+<p>Cacciatore S, Luchinat C, Tenori L. Knowledge discovery by accuracy
+maximization. Proc Natl Acad Sci U S A 2014;111(14):5117-22.</p>
+<p>To obtain BibTex entries of the two references, you can enter the
+following into your R session to Bibtex
+<code>citation("fastPLS")</code>.</p>
+<p></p>
+</div>
+<div id="references" class="section level2">
+<h2>7 <strong>References</strong></h2>
+<p>Cacciatore S, Luchinat C, Tenori L (2014) Knowledge discovery by
+accuracy maximization. ,111, 5117-22.</p>
+<p>Alizadeh AA, (2000) Distinct types of diffuse large B-cell lymphoma
+identified by gene expression profiling. , 403(6769), 503-11.</p>
+<p>Cameron CA, et al. (1997) An R-squared measure of goodness of fit of
+some common nonlinear regression models. 77(2), 1790-2.</p>
+<p>Dieterle, F et al. (2006) Probabilistic Quotient Normalization as
+Robust Method to Account for Diluition of Complex Biological Mixtures.
+Application in 1H NMR Metabolomics. Anal Chem, 78, 4281-90.</p>
+<p>Dudoit S, Fridlyand J, Speed TP (2002) Comparison of discrimination
+methods for the classification of tumors using gene expression data. ,
+97(417), 77-87.</p>
+<p>Fisher RA (1936) The use of multiple measurements in taxonomic
+problems. , 7, Part II, 179–88.</p>
+<p>Sammon, J. W. (1969) A non-linear mapping for data structure
+analysis. , C-18 401–409.</p>
+<p>Shannon CE (1948) A mathematical theory of communication. , 27(3),
+379-423.</p>
+<p>van der Maaten, L.J.P. &amp; Hinton, G.E. (2008) Visualizing
+High-Dimensional Data Using t-SNE. , 9, 2579-2605.</p>
+<p>van der Maaten, L.J.P. (2014) Accelerating t-SNE using Tree-Based
+Algorithms. , 15, 3221-3245.</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.4.1 (2024-06-14 ucrt)
+Platform: x86_64-w64-mingw32/x64
+Running under: Windows 10 x64 (build 19045)
+
+Matrix products: default
+
+
+locale:
+[1] LC_COLLATE=English_South Africa.utf8  LC_CTYPE=English_South Africa.utf8   
+[3] LC_MONETARY=English_South Africa.utf8 LC_NUMERIC=C                         
+[5] LC_TIME=English_South Africa.utf8    
+
+time zone: Africa/Johannesburg
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] fastsimpls_0.3  irlba_2.3.5.1   Matrix_1.7-0    workflowr_1.7.1
+
+loaded via a namespace (and not attached):
+ [1] jsonlite_1.8.8    compiler_4.4.1    promises_1.3.0    Rcpp_1.0.13      
+ [5] stringr_1.5.1     git2r_0.35.0      callr_3.7.6       later_1.3.2      
+ [9] jquerylib_0.1.4   yaml_2.3.10       fastmap_1.2.0     lattice_0.22-6   
+[13] R6_2.5.1          knitr_1.49        tibble_3.2.1      rprojroot_2.0.4  
+[17] bslib_0.8.0       pillar_1.9.0      rlang_1.1.4       utf8_1.2.4       
+[21] cachem_1.1.0      stringi_1.8.4     httpuv_1.6.15     xfun_0.49        
+[25] getPass_0.2-4     fs_1.6.4          sass_0.4.9        cli_3.6.3        
+[29] magrittr_2.0.3    ps_1.8.0          grid_4.4.1        digest_0.6.36    
+[33] processx_3.8.4    rstudioapi_0.16.0 lifecycle_1.0.4   vctrs_0.6.5      
+[37] evaluate_1.0.1    glue_1.7.0        whisker_0.4.1     fansi_1.0.6      
+[41] rmarkdown_2.29    httr_1.4.7        tools_4.4.1       pkgconfig_2.0.3  
+[45] htmltools_0.5.8.1</code></pre>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://cran.r-project.org/"
+class="uri">https://cran.r-project.org/</a><a href="#fnref1"
+class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://developer.apple.com/xcode/"
+class="uri">https://developer.apple.com/xcode/</a><a href="#fnref2"
+class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
