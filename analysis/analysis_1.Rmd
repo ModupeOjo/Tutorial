@@ -1,10 +1,7 @@
 ---
 title: "Analysis result"
-output:
-  workflowr::wflow_html:
-    toc: false
-editor_options:
-  chunk_output_type: console
+output: html_document
+date: "2024-12-10"
 ---
 
 ```{r setup, include=FALSE}
