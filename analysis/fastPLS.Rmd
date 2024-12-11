@@ -134,7 +134,7 @@ Cross validation technique is useful in machine learning algorithm to avoid over
 ### 6.1 Types of Cross-Validation
 
 ```{r echo=FALSE, out.width = "30%", fig.align = "center"}
-knitr::include_graphics("static/images/Picture1.png")
+knitr::include_graphics("https://github.com/ModupeOjo/Tutorial/blob/master/static/images/Picture1.png")
 ```
 
 ## 6  **How to Cite this Package**
