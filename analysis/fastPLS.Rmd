@@ -133,8 +133,8 @@ The dataset used are split into multiple folds or subsets, one of the folds is u
 Cross validation technique is useful in machine learning algorithm to avoid overfitting.
 
 ### 6.1 Types of Cross-Validation
-```{r external-image, echo=FALSE, out.width="30%", fig.align="center"}
-knitr::include_graphics("https://github.com/ModupeOjo/Tutorial/blob/master/static/images/Picture1.png")
+```{r external-image, echo=FALSE, out.width="80%", fig.align="center"}
+knitr::include_graphics("https://github.com/ModupeOjo/Tutorial/blob/master/static/images/Picture1.png?raw=true")
 ```
 
 ## 6  **How to Cite this Package**
